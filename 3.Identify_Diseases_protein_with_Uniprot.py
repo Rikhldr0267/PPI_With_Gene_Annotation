@@ -1,13 +1,27 @@
+import csv
 import requests
+from google.colab import files
 
-protein_list = ['P06400', 'P02647', 'P09601', 'P05787', 'P35222', 'P14618', 'Q16539', 'P62753', 'P61981', 'P09382', 'P12830', 'Q9UM73', 'P11362', 'P04637']
+# Read protein names from input CSV file
+with open('/content/protein_list_comp.csv', newline='') as csvfile:
+    reader = csv.reader(csvfile)
+    protein_list = [row[0] for row in reader]
 
-for protein in protein_list:
-    url = f'https://www.uniprot.org/uniprot/{protein}.txt'
-    response = requests.get(url)
-    content = response.content.decode('utf-8')
+# Check if each protein is associated with a disease and write results to output CSV file
+with open('output_proteins.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(['Protein Name', 'Disease Association'])
 
-    if 'Disease' in content:
-        print(f"{protein} is associated with a disease.")
-    else:
-        print(f"{protein} is not associated with a disease.")
+    for protein in protein_list:
+        url = f'https://www.uniprot.org/uniprot/{protein}.txt'
+        response = requests.get(url)
+        content = response.content.decode('utf-8')
+
+        if 'Disease' in content:
+            writer.writerow([protein, 'Yes'])
+        else:
+            writer.writerow([protein, 'No'])
+
+# Download the output CSV file
+files.download('output_proteins.csv')
+
